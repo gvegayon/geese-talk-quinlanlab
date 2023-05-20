@@ -20,7 +20,7 @@
 \newcommand{\pset}[1]{\mathcal{P}\left(#1\right)}
 \newcommand{\size}[1]{\left|#1\right|}
 
-\newcommand{\logit}[1]{\mbox{logit}^{-1}\left(#1\right)}
+%\newcommand{\logit}[1]{\mbox{logit}^{-1}\left(#1\right)}
 % -------------------------------------------------------------------------------
 
 % -------------------------------------------------------------------------------
@@ -28,7 +28,7 @@
 \usepackage{booktabs,tabularx}
 \usepackage{fancybox}
 \usepackage{ulem}
-\input{notation-thesis.tex}
+\input{notation.tex}
 
 % Slide numbers
 \newcounter{frame}[frame]
@@ -36,10 +36,10 @@
 
 \graphicspath{{.}{fig/}}
 
-\title[Predicting Gene Functions with Mech. ML]{Predicting of Gene Functions by Leveraging Biological Insights with Mechanistic Machine Learning\\\includegraphics[width=.25\linewidth]{DALL·E 2022-12-07 21.41.30}\vspace{-.5cm}}
+\title[Predicting Gene Functions with Mech. ML]{Predicting of Gene Functions by Leveraging Biological Insights with Mechanistic Machine Learning\\\includegraphics[width=.2\linewidth]{DALL·E 2022-12-07 21.41.30}\vspace{-.5cm}}
 \author[\hyperlink{https://ggv.cl}{https://ggv.cl}]{George G. Vega Yon, Ph.D.\\{\small \color{darkgray}george.vegayon@utah.edu}\vspace{-.5cm}}
 \institute[UofUEpi]{Division of Epidemiology @ University of Utah}
-\date{Dec 8th, 2022 @ Quinlan Lab\vspace{-.5cm}}
+\date{Jan 11th, 2023 @ Data Science Seminar\vspace{-.5cm}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,7 +69,7 @@
 
 \begin{frame}{Table of Contents}
     \tableofcontents
-    You can download the slides from \url{https://ggv.cl/quinlanlab2022}
+    You can download the slides from \url{https://ggv.cl/UofUDS2023}
     \uncover<2->{
     \vfill But first...}
 \end{frame}
@@ -86,7 +86,7 @@
     \item A methodologist researching Statistical Computing applied to Complex Systems Modeling.
     \item Got a Ph.D. in Biostats from USC and an M.Sc. in Economics from Caltech.
     \item Working with networks + programming since $\sim$2010.
-    \item Scientific software developer (R/C++).
+    \item Scientific software developer (R/C++) with (> 500K downloads + 9 CRAN packages).
 \end{itemize}
     
 \end{frame}
@@ -140,7 +140,7 @@
 
 \end{frame}
 
-\begin{frame}{Predicting Gene Function: Current methods}
+\begin{frame}{Predicting Gene Function: State-of-the-art}
 	
 	Sequences, phylogenomics, and ML.
 	
@@ -156,11 +156,14 @@
 			%			\item Focus on feature engineering
 			%			\item Beyond sequence similarity, there is \textbf{no biological theory supporting the model}.
 			%		\end{itemize}
-		\item \textbf{GOLabeler}\autocite{youGOLabelerImprovingSequencebased2018}: Top performing tool according to the CAFA challenge\autocite{Zhou2019cafa}, is an ensemble of various simple ML methods, including K-means and logistic regression.
+		\item \textbf{GOLabeler}\autocite{youGOLabelerImprovingSequencebased2018}: Top performing tool according to the \textit{Critical Assessment of Function Annotation} [CAFA] challenge\autocite{Zhou2019cafa}, is an ensemble of various simple ML methods, including K-means and logistic regression.
             \item \textbf{DeepFRI}\autocite{gligorijevicStructurebasedProteinFunction2021}: Uses Graph Convolutional Neural Networks (GCNs) to predict function based on protein structure and genetic sequence.
 	\end{itemize}
-	\vfill \uncover<9->{None of the ML-based methods relies on biological theory (mechanistic models).}
+
+%	\vfill \uncover<9->{None of the ML-based methods relies on biological theory (mechanistic models).}
+	\vfil \uncover<8->{In the latest CAFA, \textbf{none}  of the top-performing methods scored an AUC above 0.60, and most were outperformed by BLAST\autocite{Zhou2019}, which annotates using homology based on sequence similarity.}	
 \end{frame}
+
 
 \section{Evolution of Gene Function}
 \toc{}
@@ -467,12 +470,12 @@ Just controlling for preservation (having only one duplicate changing) significa
 
 \end{frame}
 
-\begin{frame}{Potential Strategies}
+\begin{frame}{Three strategies}
 	
 	\begin{itemize}
-	\item Use machine learning to learn the errors of a mechanistic model.
-	\item Add constraints to the ML algorithm based on a mechanistic model.
-	\item Add mechanistic predictions as a feature of a machine learning model.
+	\item[a.]<2-> \textbf{ML Correction}: Use machine learning to learn the errors of a mechanistic model.
+	\item[b.]<3-> \textbf{Mechanistic Feature}: Add mechanistic predictions as a feature of a machine learning model.
+	\item[c.]<4-> \textbf{Mechanistic Penalty}: Add constraints to the ML algorithm based on a mechanistic model.
 	\end{itemize}
 
 	\begin{figure}
@@ -482,31 +485,50 @@ Just controlling for preservation (having only one duplicate changing) significa
 \end{figure}
 \end{frame}
 
-\begin{frame}
-\begin{figure}
-    \centering
-    \includegraphics[width=.7\linewidth]{fig/Baker et al (Biol. Lett., 2018)-fig1.pdf}
-    \caption{``\textit{The inputs and outputs from machine learning and mechanistic modelling approaches, and the potential for synergy between the two.}'' (Figure 1 reproduced directly from \textcite{bakerMechanisticModelsMachine2018}.}
-    \label{fig:baker}
-\end{figure}
+\begin{frame}{Three strategies}
+	\framesubtitle{a. ML Correction}
+	\begin{minipage}[b]{.4\linewidth}
+		\begin{enumerate}[<+->]
+			\item Fit the mechanistic model using GEESE
+			\item Generate the mechanistic-based predictions, $\AnnPred^{GEESE}$, 
+			\item fit an ML model $f(\Features, \Omega)$ to predict $\varepsilon \equiv (\Ann - \AnnPred^{GEESE})$, \item generate the predictions of $\hat\varepsilon$, and 
+			\item Compute the Mechanistic-ML predictions as $\AnnPred^{MML1} \equiv \AnnPred^{GEESE} + \hat\varepsilon$
+		\end{enumerate}
+	\end{minipage}\hfill%
+	\begin{minipage}[b]{.55\linewidth}
+	\includegraphics[width=1\linewidth]{fig/mech-ml-model-a.pdf}
+	\end{minipage}
 \end{frame}
 
-\begin{frame}{}
-    \begin{figure}
-        \centering
-        \includegraphics[width=.8\linewidth]{fig/Rana et al (Current Opinion in Biotechnology, 2020)-fig1.pdf}
-        \caption{\footnotesize ``\textit{\textbf{Top}: Machine learning is applied to the input data to identify the important features for constructing reduced order constraint-based models; the CBM simulations can be iteratively matched with input data for convergence until the proper set of features are identified. \textbf{Bottom}: Machine learning is iteratively applied to CBM simulations to reconcile with experimental data. Interplay between the Top and Bottom parts can iteratively lead to convergence between CBM simulations, experimental data and machine learning based predictions.}'' (Figure 2 reproduced directly from \textcite{ranaRecentAdvancesConstraintbased2020})}
-        \label{fig:rana}
-    \end{figure}
+\begin{frame}{Three strategies}
+	\framesubtitle{b. Mechanistic Feature}
+	\begin{minipage}[b]{.4\linewidth}
+		\begin{enumerate}[<+->]
+		\item Fit the mechanistic model using GEESE, 
+		\item generate the mechanistic-based predictions, $\AnnPred^{GEESE}$, 
+		\item fit an ML model that uses the mechanistic predictions as features, $f(\Features, \Omega, \AnnPred^{GEESE})$, and 
+		\item Compute the Mechanistic-ML predictions as $\AnnPred^{MML2} \equiv f(\Features, \Omega, \AnnPred^{GEESE})$
+		\end{enumerate}
+	\end{minipage}\hfill
+	\begin{minipage}[b]{.55\linewidth}
+		\includegraphics[width=1\linewidth]{fig/mech-ml-model-b.pdf}
+	\end{minipage}
 \end{frame}
 
-\begin{frame}
-    \begin{figure}
-        \centering
-        \includegraphics[width=1\linewidth]{Jorner et al (Chemical Science, 2021)-fig2.pdf}
-        \caption{``\textit{Different types of quantitative reaction prediction approaches. Mechanistic DFT (a) and QSRR (b) are the current gold standard methods. Deep learning models (c) are emerging as an alternative. Hybrid models (d) combine mechanistic DFT modelling with traditional QSRR}'' (Figure 2 reproduced directly from \textcite{jornerMachineLearningMeets2021}}
-        \label{fig:jorner}
-    \end{figure}
+\begin{frame}{Three strategies}
+	\framesubtitle{c. Mechanistic Penalty}
+	\begin{minipage}[b]{.4\linewidth}
+		\begin{enumerate}[<+->]
+		\item Fit the mechanistic model using GEESE and store the parameter estimates $\hat\theta$, 
+		\item minimize the following loss function: 
+		$$
+		L(\annObs, \Features, \Omega) - \loglik{f(\annObs, \Features, \Omega)}_{GEESE},$$
+		\noindent where $\loglik{\cdot}$ is the likelihood function under GEESE.
+		\end{enumerate}
+	\end{minipage}\hfill%
+	\begin{minipage}[b]{.55\linewidth}
+		\includegraphics[width=1\linewidth]{fig/mech-ml-model-c.pdf}
+	\end{minipage}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -548,7 +570,7 @@ Thinking of different ways to use it as:\\\bigskip
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[t]{What went into the blender}
-\small
+\small\vspace{-1cm}
 \begin{center}
     \uncover<2->{\byside{.45}{Data Feats}{
         \begin{itemize}
@@ -623,15 +645,15 @@ We are comparing three models:
 
 \end{frame}
 
-\begin{frame}{Discussion (cont.)}
-    \begin{itemize}[<+->]
-        \item This is the core of an R01 first submitted in Feb 2022.
-        \item The original version did not feature any ML, just the mechanistic part.
-        \item Two important critiques: ``Not leveraging large genomic data'' and ``Not using Neural Networks''
-        \item We believe we are addressing both using gene expression data (Bgee) and Mechanistic ML.
-        \item ...your thoughts?
-    \end{itemize}
-\end{frame}
+%\begin{frame}{Discussion (cont.)}
+%    \begin{itemize}[<+->]
+%        \item This is the core of an R01 first submitted in Feb 2022.
+%        \item The original version did not feature any ML, just the mechanistic part.
+%        \item Two important critiques: ``Not leveraging large genomic data'' and ``Not using Neural Networks''
+%        \item We believe we are addressing both using gene expression data (Bgee) and Mechanistic ML.
+%        \item ...your thoughts?
+%    \end{itemize}
+%\end{frame}
 
 \begin{frame}{}
 \begin{center}
